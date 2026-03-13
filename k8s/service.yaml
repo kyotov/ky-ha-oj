@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: thermostat
+  namespace: monitoring
+  labels:
+    app: thermostat
+spec:
+  selector:
+    app: thermostat
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8001

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: thermostat
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thermostat
+  template:
+    metadata:
+      labels:
+        app: thermostat
+    spec:
+      containers:
+        - name: thermostat
+          image: registry.kamenet.org/thermostat:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          env:
+            - name: THERMOSTAT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: thermostat-credentials
+                  key: username
+            - name: THERMOSTAT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: thermostat-credentials
+                  key: password
+          livenessProbe:
+            httpGet:
+              path: /thermostats
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /thermostats
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
