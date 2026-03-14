@@ -1,14 +1,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: thermostat
+  name: oj-microline
   namespace: monitoring
   labels:
     release: prometheus
 spec:
   selector:
     matchLabels:
-      app: thermostat
+      app: oj-microline
   endpoints:
     - port: http
       path: /metrics/

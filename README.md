@@ -1,4 +1,4 @@
-# Thermostat Dashboard
+# OJ Microline Dashboard
 
 A monitoring and control dashboard for [OJ Microline WG4](https://www.ojelectronics.com) floor heating thermostats.
 
@@ -11,7 +11,7 @@ A monitoring and control dashboard for [OJ Microline WG4](https://www.ojelectron
 
 ### Dashboard
 
-Open https://thermostat.kamenet.org in a browser.
+Open https://oj-microline.kamenet.org in a browser.
 
 - Cards refresh automatically every 60 seconds
 - Click **↺ Refresh** to force an immediate re-fetch from the thermostat API
@@ -65,10 +65,7 @@ pnpm exec playwright test
 ## Build and Deploy
 
 ```bash
-podman build -t registry.kamenet.org/thermostat:latest .
-podman push registry.kamenet.org/thermostat:latest
-kubectl rollout restart deployment/thermostat -n monitoring
-kubectl rollout status deployment/thermostat -n monitoring
+./scripts/build.sh
 ```
 
 ## Configuration

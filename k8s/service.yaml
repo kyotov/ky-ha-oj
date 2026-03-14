@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: thermostat
+  name: oj-microline
   namespace: monitoring
   labels:
-    app: thermostat
+    app: oj-microline
 spec:
   selector:
-    app: thermostat
+    app: oj-microline
   ports:
     - name: http
       port: 80

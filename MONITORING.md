@@ -35,24 +35,18 @@ kubectl exec -n monitoring prometheus-grafana-57cc4d7fc4-9pxmm -c grafana -- \
 
 ---
 
-# Thermostat Service
+# OJ Microline Service
 
 FastAPI + React dashboard for OJ Microline WG4 thermostats, deployed in the `monitoring` namespace.
 
-- **URL:** https://thermostat.kamenet.org
-- **Image:** `registry.kamenet.org/thermostat:latest`
+- **URL:** https://oj-microline.kamenet.org
+- **Image:** `registry.kamenet.org/oj-microline:latest`
 - **Manifests:** `k8s/`
 
 ## Build and Deploy
 
 ```bash
-# Build and push the image
-podman build -t registry.kamenet.org/thermostat:latest .
-podman push registry.kamenet.org/thermostat:latest
-
-# Roll out the new image
-kubectl rollout restart deployment/thermostat -n monitoring
-kubectl rollout status deployment/thermostat -n monitoring
+./scripts/build.sh
 ```
 
 ## Run Locally

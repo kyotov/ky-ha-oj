@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: thermostat
+  name: oj-microline
   namespace: monitoring
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
@@ -10,16 +10,16 @@ metadata:
 spec:
   tls:
     - hosts:
-        - thermostat.kamenet.org
-      secretName: thermostat-tls
+        - oj-microline.kamenet.org
+      secretName: oj-microline-tls
   rules:
-    - host: thermostat.kamenet.org
+    - host: oj-microline.kamenet.org
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: thermostat
+                name: oj-microline
                 port:
                   name: http
