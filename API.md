@@ -197,7 +197,7 @@ Must include UTC offset: `"dd/mm/yyyy HH:MM:00 +00:00"`. The seconds component m
 
 ---
 
-## 3. FastAPI Wrapper — Current Endpoints
+## 3. FastAPI Wrapper — Endpoints
 
 Base URL: `http://localhost:8001`
 
@@ -207,10 +207,28 @@ Base URL: `http://localhost:8001`
 | POST | `/thermostats/refresh` | Force cache refresh, return fresh data |
 | GET | `/thermostats/{name}` | Single thermostat by name (case-insensitive) |
 | GET | `/metrics/` | Prometheus scrape endpoint |
+| POST | `/thermostats/all/manual` | Set manual SP on all thermostats |
+| POST | `/thermostats/all/comfort` | Set comfort SP + end time on all |
+| POST | `/thermostats/all/vacation` | Enable/disable vacation on all |
+| POST | `/thermostats/all/vacation-setpoint` | Set vacation SP on all |
+| POST | `/thermostats/all/mode` | Set regulation mode on all |
+| POST | `/thermostats/{name}/manual` | Set manual SP on one thermostat |
+| POST | `/thermostats/{name}/comfort` | Set comfort SP + end time on one |
+| POST | `/thermostats/{name}/vacation` | Enable/disable vacation on one |
+| POST | `/thermostats/{name}/vacation-setpoint` | Set vacation SP on one |
+| POST | `/thermostats/{name}/mode` | Set regulation mode on one |
+
+> **Route ordering gotcha (FastAPI):** `/thermostats/all/...` routes must be registered
+> *before* `/thermostats/{name}/...` routes. FastAPI matches routes in registration order,
+> so if `/{name}/` comes first it will capture `all` as the name parameter and return 404.
+
+All write endpoints call `_fresh_response()` after the write, which forces a full re-fetch
+from the thermostat API and returns `{ last_updated, thermostats }` (plus `results` for bulk
+endpoints). This ensures the response always reflects the actual state after the write.
 
 ---
 
-## 4. FastAPI Wrapper — Planned Write Endpoints
+## 4. FastAPI Wrapper — Write Endpoint Details
 
 ### Architecture
 

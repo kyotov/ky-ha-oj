@@ -352,6 +352,78 @@ async def get_thermostat(name: str):
     return thermostat_to_dict(_find_thermostat(name))
 
 
+# --- Write endpoints — all thermostats (must be before /{name}/ routes) ----
+
+@app.post("/thermostats/all/manual")
+async def set_all_manual(req: ManualRequest):
+    await _refresh_if_stale()
+    results = []
+    for t in _thermostats:
+        try:
+            await _set_manual(t, req.temperature_f)
+            results.append({"name": t.name, "success": True})
+        except HTTPException as e:
+            results.append({"name": t.name, "success": False, "error": e.detail})
+    fresh = await _fresh_response()
+    return {**fresh, "results": results}
+
+
+@app.post("/thermostats/all/comfort")
+async def set_all_comfort(req: ComfortRequest):
+    await _refresh_if_stale()
+    results = []
+    for t in _thermostats:
+        try:
+            await _set_comfort(t, req.temperature_f, req.end_time)
+            results.append({"name": t.name, "success": True})
+        except HTTPException as e:
+            results.append({"name": t.name, "success": False, "error": e.detail})
+    fresh = await _fresh_response()
+    return {**fresh, "results": results}
+
+
+@app.post("/thermostats/all/vacation")
+async def set_all_vacation(req: VacationRequest):
+    await _refresh_if_stale()
+    results = []
+    for t in _thermostats:
+        try:
+            await _set_vacation(t, req)
+            results.append({"name": t.name, "success": True})
+        except HTTPException as e:
+            results.append({"name": t.name, "success": False, "error": e.detail})
+    fresh = await _fresh_response()
+    return {**fresh, "results": results}
+
+
+@app.post("/thermostats/all/vacation-setpoint")
+async def set_all_vacation_setpoint(req: VacationSetpointRequest):
+    await _refresh_if_stale()
+    results = []
+    for t in _thermostats:
+        try:
+            await _set_vacation_setpoint(t, req.temperature_f)
+            results.append({"name": t.name, "success": True})
+        except HTTPException as e:
+            results.append({"name": t.name, "success": False, "error": e.detail})
+    fresh = await _fresh_response()
+    return {**fresh, "results": results}
+
+
+@app.post("/thermostats/all/mode")
+async def set_all_mode(req: ModeRequest):
+    await _refresh_if_stale()
+    results = []
+    for t in _thermostats:
+        try:
+            await _set_mode(t, req.mode)
+            results.append({"name": t.name, "success": True})
+        except HTTPException as e:
+            results.append({"name": t.name, "success": False, "error": e.detail})
+    fresh = await _fresh_response()
+    return {**fresh, "results": results}
+
+
 # --- Write endpoints — single thermostat ------------------------------------
 
 @app.post("/thermostats/{name}/manual")
@@ -387,78 +459,6 @@ async def set_mode(name: str, req: ModeRequest):
     await _refresh_if_stale()
     await _set_mode(_find_thermostat(name), req.mode)
     return await _fresh_response()
-
-
-# --- Write endpoints — all thermostats --------------------------------------
-
-@app.post("/thermostats/all/manual")
-async def set_all_manual(req: ManualRequest):
-    await _refresh_if_stale()
-    results = []
-    for t in _thermostats:
-        try:
-            await _set_manual(t, req.temperature_f)
-            results.append({"name": t.name, "success": True})
-        except HTTPException as e:
-            results.append({"name": t.name, "success": False, "error": e.detail})
-    await _fetch()
-    return {"results": results, "thermostats": [thermostat_to_dict(t) for t in _thermostats]}
-
-
-@app.post("/thermostats/all/comfort")
-async def set_all_comfort(req: ComfortRequest):
-    await _refresh_if_stale()
-    results = []
-    for t in _thermostats:
-        try:
-            await _set_comfort(t, req.temperature_f, req.end_time)
-            results.append({"name": t.name, "success": True})
-        except HTTPException as e:
-            results.append({"name": t.name, "success": False, "error": e.detail})
-    await _fetch()
-    return {"results": results, "thermostats": [thermostat_to_dict(t) for t in _thermostats]}
-
-
-@app.post("/thermostats/all/vacation")
-async def set_all_vacation(req: VacationRequest):
-    await _refresh_if_stale()
-    results = []
-    for t in _thermostats:
-        try:
-            await _set_vacation(t, req)
-            results.append({"name": t.name, "success": True})
-        except HTTPException as e:
-            results.append({"name": t.name, "success": False, "error": e.detail})
-    await _fetch()
-    return {"results": results, "thermostats": [thermostat_to_dict(t) for t in _thermostats]}
-
-
-@app.post("/thermostats/all/vacation-setpoint")
-async def set_all_vacation_setpoint(req: VacationSetpointRequest):
-    await _refresh_if_stale()
-    results = []
-    for t in _thermostats:
-        try:
-            await _set_vacation_setpoint(t, req.temperature_f)
-            results.append({"name": t.name, "success": True})
-        except HTTPException as e:
-            results.append({"name": t.name, "success": False, "error": e.detail})
-    await _fetch()
-    return {"results": results, "thermostats": [thermostat_to_dict(t) for t in _thermostats]}
-
-
-@app.post("/thermostats/all/mode")
-async def set_all_mode(req: ModeRequest):
-    await _refresh_if_stale()
-    results = []
-    for t in _thermostats:
-        try:
-            await _set_mode(t, req.mode)
-            results.append({"name": t.name, "success": True})
-        except HTTPException as e:
-            results.append({"name": t.name, "success": False, "error": e.detail})
-    await _fetch()
-    return {"results": results, "thermostats": [thermostat_to_dict(t) for t in _thermostats]}
 
 
 if FRONTEND_DIST.exists():
