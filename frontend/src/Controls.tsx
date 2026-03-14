@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import type { ThermostatsResponse } from './types'
+import './controls.css'
+import type { Thermostat, ThermostatsResponse } from './types'
 import {
   setManual, setComfort, setVacationSetpoint, setMode,
   setAllManual, setAllComfort, setAllVacationSetpoint, setAllMode,
@@ -7,7 +8,12 @@ import {
 
 interface Props {
   name?: string  // undefined = all thermostats
+  thermostat?: Thermostat
   onSuccess: (data: ThermostatsResponse) => void
+}
+
+const MODE_LABELS: Record<string, string> = {
+  Manual: '1', Comfort: '2', Schedule: '3', Vacation: '4',
 }
 
 type Section = 'manual' | 'comfort' | 'vacsp' | 'mode' | null
@@ -19,7 +25,7 @@ const MODES = [
   { value: 4, label: 'Vacation' },
 ]
 
-export function Controls({ name, onSuccess }: Props) {
+export function Controls({ name, thermostat: t, onSuccess }: Props) {
   const [open, setOpen] = useState<Section>(null)
   const [temp, setTemp] = useState('68')
   const [endTime, setEndTime] = useState(() => {
@@ -32,8 +38,20 @@ export function Controls({ name, onSuccess }: Props) {
   const [err, setErr] = useState<string | null>(null)
 
   function toggle(s: Section) {
-    setOpen((prev) => (prev === s ? null : s))
+    const opening = open !== s
+    setOpen(opening ? s : null)
     setErr(null)
+    if (!opening || !t) return
+    if (s === 'manual') setTemp(t.manual_temperature_f.toFixed(1))
+    if (s === 'comfort') {
+      setTemp(t.comfort_temperature_f.toFixed(1))
+      if (t.comfort_end_time) {
+        const d = new Date(t.comfort_end_time)
+        if (d.getFullYear() >= 2000) setEndTime(d.toISOString().slice(0, 16))
+      }
+    }
+    if (s === 'vacsp') setTemp(t.vacation_temperature_f.toFixed(1))
+    if (s === 'mode') setModeVal(MODE_LABELS[t.regulation_mode] ?? '1')
   }
 
   async function submit(action: () => Promise<ThermostatsResponse>) {
@@ -156,10 +174,14 @@ function TempInput({ value, onChange }: { value: string; onChange: (v: string) =
 
 function Btn({ busy, onClick }: { busy: boolean; onClick: () => void }) {
   return (
-    <button style={{ ...s.setBtn, opacity: busy ? 0.5 : 1 }} disabled={busy} onClick={onClick}>
-      {busy ? '…' : 'Set'}
+    <button style={{ ...s.setBtn, opacity: busy ? 0.7 : 1 }} disabled={busy} onClick={onClick}>
+      {busy ? <Spinner /> : 'Set'}
     </button>
   )
+}
+
+function Spinner() {
+  return <span className="spinner" />
 }
 
 const s: Record<string, React.CSSProperties> = {

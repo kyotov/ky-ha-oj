@@ -64,7 +64,7 @@ export function ThermostatCard({ thermostat: t, onSuccess }: Props) {
         {showControls ? '▲ Hide controls' : '▼ Controls'}
       </button>
 
-      {showControls && <Controls name={t.name} onSuccess={onSuccess} />}
+      {showControls && <Controls name={t.name} thermostat={t} onSuccess={onSuccess} />}
     </div>
   )
 }
