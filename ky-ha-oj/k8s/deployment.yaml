@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oj-microline
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oj-microline
+  template:
+    metadata:
+      labels:
+        app: oj-microline
+    spec:
+      containers:
+        - name: oj-microline
+          image: registry.kamenet.org/oj-microline:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+          env:
+            - name: THERMOSTAT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: oj-microline-credentials
+                  key: username
+            - name: THERMOSTAT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oj-microline-credentials
+                  key: password
+          livenessProbe:
+            httpGet:
+              path: /thermostats
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /thermostats
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
