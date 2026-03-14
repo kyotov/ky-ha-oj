@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-db-backup
+  namespace: monitoring
+spec:
+  storageClassName: local-path
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prometheus-backup
+  namespace: monitoring
+spec:
+  schedule: "0 3 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: rsync
+              image: alpine:latest
+              command:
+                - sh
+                - -c
+                - |
+                  apk add --no-cache rsync && \
+                  rsync -a --delete /source/ /backup/
+              volumeMounts:
+                - name: source
+                  mountPath: /source
+                  readOnly: true
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: source
+              persistentVolumeClaim:
+                claimName: prometheus-db-prometheus-prometheus-kube-prometheus-prometheus-0
+                readOnly: true
+            - name: backup
+              persistentVolumeClaim:
+                claimName: prometheus-db-backup
