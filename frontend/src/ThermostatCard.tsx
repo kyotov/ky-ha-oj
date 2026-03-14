@@ -1,12 +1,16 @@
-import type { Thermostat } from './types'
+import { useState } from 'react'
+import type { Thermostat, ThermostatsResponse } from './types'
+import { Controls } from './Controls'
 
 interface Props {
   thermostat: Thermostat
+  onSuccess: (data: ThermostatsResponse) => void
 }
 
-export function ThermostatCard({ thermostat: t }: Props) {
+export function ThermostatCard({ thermostat: t, onSuccess }: Props) {
   const delta = t.temperature_f - t.set_point_f
   const aboveSP = delta > 0
+  const [showControls, setShowControls] = useState(false)
 
   return (
     <div style={styles.card}>
@@ -52,6 +56,15 @@ export function ThermostatCard({ thermostat: t }: Props) {
         <Row label="Serial" value={t.serial_number} />
         <Row label="Firmware" value={t.firmware} />
       </div>
+
+      <button
+        style={styles.controlsToggle}
+        onClick={() => setShowControls((v) => !v)}
+      >
+        {showControls ? '▲ Hide controls' : '▼ Controls'}
+      </button>
+
+      {showControls && <Controls name={t.name} onSuccess={onSuccess} />}
     </div>
   )
 }
@@ -116,6 +129,16 @@ const styles: Record<string, React.CSSProperties> = {
   tempValue: { fontSize: 20, fontWeight: 700, color: '#f1f5f9', marginTop: 2 },
   arrow: { fontSize: 16, marginBottom: -4, flexShrink: 0 },
   details: { display: 'flex', flexDirection: 'column', gap: 6 },
+  controlsToggle: {
+    background: 'none',
+    color: '#64748b',
+    border: '1px solid #1e293b',
+    borderRadius: 6,
+    padding: '4px 10px',
+    fontSize: 12,
+    cursor: 'pointer',
+    alignSelf: 'flex-start',
+  },
   row: { display: 'flex', justifyContent: 'space-between', fontSize: 13 },
   rowLabel: { color: '#94a3b8' },
   rowValue: { color: '#e2e8f0', fontVariantNumeric: 'tabular-nums' },
