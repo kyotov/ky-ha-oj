@@ -1,15 +1,3 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: prometheus-db-backup
-  namespace: monitoring
-spec:
-  storageClassName: local-path
-  accessModes: [ReadWriteOnce]
-  resources:
-    requests:
-      storage: 20Gi
----
 apiVersion: batch/v1
 kind: CronJob
 metadata:
@@ -44,5 +32,6 @@ spec:
                 claimName: prometheus-db-prometheus-prometheus-kube-prometheus-prometheus-0
                 readOnly: true
             - name: backup
-              persistentVolumeClaim:
-                claimName: prometheus-db-backup
+              hostPath:
+                path: /home/kamen/work/20260312/prometheus-data-backup
+                type: DirectoryOrCreate
